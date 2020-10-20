@@ -40,10 +40,13 @@ export class StuAnswersComponent implements OnInit {
   public wrong = [];
   public newform = [];
 
+  public questionsForm: FormGroup;
+
   constructor(private http:  HttpClient  , private fb: FormBuilder, public service: ApiService, public rout: Router, 
               public actroute: ActivatedRoute) { }
 
   ngOnInit(): void {
+    this.questionsForm = this.fb.group({})
     this.loadquests();
     // this.newform = this.fb.group({
     //    scores: this.optional,
@@ -61,6 +64,18 @@ export class StuAnswersComponent implements OnInit {
     console.log('students_id: ', this.students_id);
     const y = newdata.filter(stu => stu.Exam_No === this.students_id);
     this.answers = y;
+    let controlObject = {};
+
+    this.answers.map(question => {
+      controlObject[`q${question.quest_id}`] = ['']
+    })
+
+    this.questionsForm = this.fb.group(controlObject);
+    this.answers.map(question => {
+      this.questionsForm.controls[`q${question.quest_id}`].setValue("")
+    })
+    console.log(this.questionsForm.value,"FORM CONTROL");
+    // console.log(controlObject, " QUESTIONS CONTROL");
     if(y.length == 0){
      this.noquestions = true;
    }
@@ -121,9 +136,26 @@ export class StuAnswersComponent implements OnInit {
   }
 
   submitexam(){
-    this.service.endexam({scores: this.bindingadd}).subscribe(data => {
-      console.log(data);
+    let score = 0;
+    let userAns = this.questionsForm.value;
+    let keys = Object.keys(userAns);
+    keys.map(key => {
+      let question_id = key.split('q')[1];
+      let question = this.answers.filter(ans => ans.quest_id == question_id);
+      let correctAns = question[0].correctans;
+      
+      if(correctAns == userAns[key]){
+        score += 1;
+      }else{
+        score += 0;
+      }
     })
+
+    console.log(userAns, "USER ANSWER");
+    console.log(score, "USER SCORE");
+    // this.service.endexam({scores: this.bindingadd}).subscribe(data => {
+    //   console.log(data);
+    // })
     // let base = 'http://localhost/newcbt2/studentscore.php';
     
     // this.http.post(base,{scores: this.bindingadd}).subscribe(data => {
