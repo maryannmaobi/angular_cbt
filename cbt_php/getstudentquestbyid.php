@@ -2,7 +2,7 @@
 require 'database.php';
 $_POST = json_decode(file_get_contents('php://input'), true);
 
-$sql = "SELECT course_id as Exam_No, quest_id, question, optionA, optionB, optionC, optionD 
+$sql = "SELECT course_id as Exam_No, quest_id, question, optionA, optionB, optionC, optionD, correctans
         FROM questionss 
         JOIN courses 
         USING(course_id)";
